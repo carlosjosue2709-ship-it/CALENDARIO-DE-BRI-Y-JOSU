@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Nuestro calendario">
+<meta name="theme-color" content="#ffb3d1">
+<link rel="apple-touch-icon" href="">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&display=swap">
+<title>Nuestro calendario de amor</title>
+<style>
+:root{--bg1:#ffc9de;--bg2:#ff9fc6;--card:rgba(255,255,255,.8);--cell:rgba(255,255,255,.55);--ink:#6a1b45;--soft:#b34a80;--acc:#f5b800;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg1:#c4588a;--bg2:#8e2f5f;--card:rgba(60,15,40,.78);--cell:rgba(60,15,40,.45);--ink:#ffe8f2;--soft:#ffb8d5}}
+:root[data-theme="dark"]{--bg1:#c4588a;--bg2:#8e2f5f;--card:rgba(60,15,40,.78);--cell:rgba(60,15,40,.45);--ink:#ffe8f2;--soft:#ffb8d5}
+html,body{height:100%;margin:0}
+body{background:linear-gradient(160deg,var(--bg1),var(--bg2)) fixed;color:var(--ink);font-family:-apple-system,"Helvetica Neue",system-ui,sans-serif;overflow:hidden}
+.screen{position:fixed;inset:0;overflow:auto;padding:calc(env(safe-area-inset-top,0px) + 16px) 16px calc(env(safe-area-inset-bottom,0px) + 16px)}
+#inicio{display:flex;align-items:center;justify-content:center}
+#flores{position:fixed;inset:0;overflow:hidden;pointer-events:none}
+.fl{position:absolute;animation:bloom 1.6s var(--d) both cubic-bezier(.2,1.5,.4,1)}
+.fl svg{width:100%;height:100%;animation:sway 3.5s ease-in-out infinite alternate;animation-delay:var(--d);filter:drop-shadow(0 3px 4px rgba(150,40,90,.25))}
+@keyframes bloom{from{transform:scale(0) rotate(calc(var(--r) - 120deg));opacity:0}to{transform:scale(1) rotate(var(--r));opacity:1}}
+@keyframes sway{from{transform:rotate(-7deg)}to{transform:rotate(7deg)}}
+@keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.card{position:relative;z-index:2;background:var(--card);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-radius:26px;padding:24px 22px;max-width:420px;width:100%;box-shadow:0 10px 40px rgba(120,20,70,.25);text-align:center}
+.msg{max-height:100%;overflow:auto}
+.msg>*{opacity:0;animation:up .9s both}
+h1{font-family:"Dancing Script",cursive;font-size:2.3rem;margin:0 0 10px;line-height:1.1}
+.msg p{margin:0 0 12px;font-size:1.04rem;line-height:1.5}
+button{font:inherit;color:inherit;cursor:pointer;border:0}
+.btn{background:linear-gradient(135deg,#ffd93b,#ffb800);color:#5a2a00;font-weight:700;padding:14px 22px;border-radius:999px;font-size:1.05rem;box-shadow:0 6px 16px rgba(200,120,0,.35)}
+.btn.sec{background:var(--cell);color:var(--ink);box-shadow:none;font-weight:600;padding:10px 16px;font-size:.95rem}
+#cal{display:none;max-width:480px;margin:0 auto}
+.top{display:flex;align-items:center;justify-content:space-between;margin:6px 0 10px}
+.top h2{font-family:"Dancing Script",cursive;font-size:2rem;margin:0;text-transform:capitalize;text-align:center;flex:1}
+.nav{background:var(--cell);width:42px;height:42px;border-radius:50%;font-size:1.3rem}
+.sem,.grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.sem{margin-bottom:6px;text-align:center;font-weight:700;color:var(--soft);font-size:.85rem}
+.day{aspect-ratio:1;background:var(--cell);border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0;gap:1px}
+.day b{font-size:1rem}.day span{font-size:1.1rem;min-height:1.2em}
+.day.hoy{outline:3px solid var(--acc);background:rgba(255,217,59,.45)}
+#dias{font-weight:700;font-size:1.05rem;margin:0 0 8px}
+.row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+input[type=date],textarea{font:inherit;font-size:16px;border-radius:12px;border:2px solid var(--soft);padding:8px;background:var(--cell);color:var(--ink);width:100%;box-sizing:border-box}
+#sheet{position:fixed;inset:0;background:rgba(80,10,50,.45);display:none;align-items:flex-end;justify-content:center;z-index:5}
+#sheet .card{border-radius:26px 26px 0 0;padding-bottom:calc(env(safe-area-inset-bottom,0px) + 20px);text-align:left}
+#sheet h3{margin:0 0 10px;font-family:"Dancing Script",cursive;font-size:1.6rem;text-transform:capitalize}
+.ems{display:flex;gap:8px;margin:10px 0}
+.em{background:var(--cell);font-size:1.5rem;border-radius:12px;padding:6px 10px}
+.em.on{outline:3px solid var(--acc)}
+</style>
+</head>
+<body>
+<section id="inicio" class="screen">
+  <div id="flores"></div>
+  <div class="card msg" id="msg">
+    <h1>Para ti, mi casi novia 💛</h1>
+    <p>Si pudiera regalarte algo, te regalaría un campo infinito de flores amarillas, porque así se siente tu sonrisa: como un día de sol que me alegra todo.</p>
+    <p>Contigo hasta los días normales se vuelven bonitos, y cada mensaje tuyo es una flor nueva en mi día.</p>
+    <p>Gracias por existir, por ser como eres y por dejarme conocerte. Quiero seguir sumando días a tu lado y llenar este calendario de recuerdos nuestros.</p>
+    <p>Muy pronto quiero hacerte una pregunta importante… 🌼</p>
+    <button class="btn" id="abrir">Abrir nuestro calendario 💛</button>
+  </div>
+</section>
+
+<section id="cal" class="screen">
+  <div style="max-width:480px;margin:0 auto">
+    <div class="top">
+      <button class="nav" id="prev" aria-label="Mes anterior">‹</button>
+      <h2 id="mes"></h2>
+      <button class="nav" id="next" aria-label="Mes siguiente">›</button>
+    </div>
+    <div class="sem"><span>L</span><span>M</span><span>X</span><span>J</span><span>V</span><span>S</span><span>D</span></div>
+    <div class="grid" id="grid"></div>
+    <div class="card" style="margin-top:16px;padding:16px">
+      <p id="dias"></p>
+      <input type="date" id="since" aria-label="Fecha en que se conocieron">
+      <div class="row"><button class="btn sec" id="ver">🌼 Ver mi mensaje</button><button class="btn sec" id="copiar">📋 Copiar mis recuerdos</button></div>
+      <textarea id="exp" readonly rows="3" style="display:none;margin-top:10px"></textarea>
+    </div>
+  </div>
+</section>
+
+<div id="sheet">
+  <div class="card">
+    <h3 id="fecha"></h3>
+    <textarea id="txt" rows="3" placeholder="Escribe un recuerdo o plan bonito…"></textarea>
+    <div class="ems" id="ems"></div>
+    <div class="row" style="margin-top:6px">
+      <button class="btn" id="guardar">Guardar</button>
+      <button class="btn sec" id="borrar">Borrar</button>
+      <button class="btn sec" id="cerrar">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+let S = {};
+try { S = JSON.parse(localStorage.getItem('calamor') || '{}'); } catch (e) {}
+S.notes = S.notes || {};
+const save = () => { try { localStorage.setItem('calamor', JSON.stringify(S)); } catch (e) {} };
+
+// Ícono para la pantalla de inicio del iPhone
+try {
+  const c = document.createElement('canvas'); c.width = c.height = 180;
+  const x = c.getContext('2d');
+  x.fillStyle = '#ff9fc6'; x.fillRect(0, 0, 180, 180); x.translate(90, 90);
+  x.fillStyle = '#ffd93b';
+  for (let i = 0; i < 10; i++) { x.rotate(Math.PI / 5); x.beginPath(); x.ellipse(0, -40, 17, 32, 0, 0, 7); x.fill(); }
+  x.fillStyle = '#8a4b12'; x.beginPath(); x.arc(0, 0, 20, 0, 7); x.fill();
+  $('link[rel=apple-touch-icon]').href = c.toDataURL('image/png');
+} catch (e) {}
+
+// Flor amarilla (símbolo reutilizable)
+let petalos = '';
+for (let i = 0; i < 12; i++) petalos += `<ellipse cx="50" cy="20" rx="9" ry="19" transform="rotate(${i * 30} 50 50)"/>`;
+document.body.insertAdjacentHTML('afterbegin',
+  `<svg width="0" height="0" style="position:absolute"><symbol id="f" viewBox="0 0 100 100"><g fill="#ffd93b" stroke="#f0b000" stroke-width="1.2">${petalos}</g><circle cx="50" cy="50" r="14" fill="#8a4b12"/><circle cx="50" cy="50" r="7" fill="#5b2f0a"/></symbol></svg>`);
+
+// Muchas flores que florecen al abrir
+const stage = $('#flores');
+for (let i = 0; i < 48; i++) {
+  const d = document.createElement('div'), s = 40 + Math.random() * 80;
+  d.className = 'fl';
+  d.style.cssText = `left:${Math.random() * 96 - 4}%;top:${Math.random() * 96 - 4}%;width:${s}px;height:${s}px;--d:${(Math.random() * 2.6).toFixed(2)}s;--r:${Math.floor(Math.random() * 360)}deg`;
+  d.innerHTML = '<svg viewBox="0 0 100 100"><use href="#f"/></svg>';
+  stage.appendChild(d);
+}
+[...$('#msg').children].forEach((e, i) => e.style.animationDelay = (1.3 + i * 0.9) + 's');
+
+// Calendario
+let cur = new Date(); cur.setDate(1);
+let sel = null, emoji = '💛';
+const pad = n => String(n).padStart(2, '0');
+const key = (y, m, d) => `${y}-${pad(m + 1)}-${pad(d)}`;
+
+// true = tu versión de edición (aquí en Claude). false = versión para ella.
+const MODO_EDICION = false;
+// Si pones una fecha AAAA-MM-DD, ella verá el contador de días en su versión.
+const FECHA_FIJA = '';
+// Recuerdos que ella verá en su calendario. Formato: {'2026-11-12': {e: '💛', t: 'mensaje'}}
+const NOTAS_FIJAS = {};
+// Enlace CSV de tu Google Sheet publicado (columnas: fecha, emoji, mensaje). Vacío = sin hoja.
+const URL_HOJA = '';
+
+function contador() {
+  const fecha = MODO_EDICION ? S.since : FECHA_FIJA;
+  $('#since').style.display = MODO_EDICION ? '' : 'none';
+  $('#copiar').style.display = MODO_EDICION ? '' : 'none';
+  $('#dias').style.display = (MODO_EDICION || fecha) ? '' : 'none';
+  if (fecha) {
+    const hoy = new Date().setHours(0, 0, 0, 0);
+    const d = Math.floor((hoy - new Date(fecha + 'T00:00:00')) / 864e5);
+    $('#dias').textContent = d >= 0 ? `Llevamos ${d} días de conocernos 💛` : `Faltan ${-d} días para esa fecha 💛`;
+    if (MODO_EDICION) $('#since').value = fecha;
+  } else {
+    $('#dias').textContent = 'Elige la fecha en que se conocieron 👇';
+  }
+}
+
+function draw() {
+  const y = cur.getFullYear(), m = cur.getMonth();
+  $('#mes').textContent = cur.toLocaleDateString('es', { month: 'long', year: 'numeric' });
+  const off = (new Date(y, m, 1).getDay() + 6) % 7, n = new Date(y, m + 1, 0).getDate();
+  const t = new Date(), tk = key(t.getFullYear(), t.getMonth(), t.getDate());
+  let h = '';
+  for (let i = 0; i < off; i++) h += '<i></i>';
+  for (let d = 1; d <= n; d++) {
+    const k = key(y, m, d), no = S.notes[k] || NOTAS_FIJAS[k];
+    h += `<button class="day${k === tk ? ' hoy' : ''}" data-k="${k}"><b>${d}</b><span>${no ? no.e : ''}</span></button>`;
+  }
+  $('#grid').innerHTML = h;
+  contador();
+}
+
+function pintarEmojis() {
+  $('#ems').innerHTML = ['💛', '🌼', '💌', '🌹', '🎉'].map(e => `<button class="em${e === emoji ? ' on' : ''}" data-e="${e}">${e}</button>`).join('');
+}
+
+$('#grid').addEventListener('click', ev => {
+  const b = ev.target.closest('.day'); if (!b) return;
+  sel = b.dataset.k;
+  const no = S.notes[sel] || NOTAS_FIJAS[sel];
+  emoji = no ? no.e : '💛';
+  $('#txt').value = no ? no.t : '';
+  $('#fecha').textContent = new Date(sel + 'T00:00:00').toLocaleDateString('es', { weekday: 'long', day: 'numeric', month: 'long' });
+  pintarEmojis();
+  $('#sheet').style.display = 'flex';
+});
+$('#ems').addEventListener('click', ev => {
+  const b = ev.target.closest('.em'); if (!b) return;
+  emoji = b.dataset.e; pintarEmojis();
+});
+$('#guardar').onclick = () => { S.notes[sel] = { e: emoji, t: $('#txt').value }; save(); $('#sheet').style.display = 'none'; draw(); };
+$('#borrar').onclick = () => { delete S.notes[sel]; save(); $('#sheet').style.display = 'none'; draw(); };
+$('#cerrar').onclick = () => { $('#sheet').style.display = 'none'; };
+$('#prev').onclick = () => { cur.setMonth(cur.getMonth() - 1); draw(); };
+$('#next').onclick = () => { cur.setMonth(cur.getMonth() + 1); draw(); };
+$('#since').onchange = e => { S.since = e.target.value; save(); contador(); };
+$('#abrir').onclick = () => { $('#inicio').style.display = 'none'; $('#cal').style.display = 'block'; draw(); };
+$('#ver').onclick = () => { $('#cal').style.display = 'none'; $('#inicio').style.display = 'flex'; };
+$('#copiar').onclick = async () => {
+  const j = JSON.stringify(S.notes);
+  try { await navigator.clipboard.writeText(j); $('#copiar').textContent = '✅ Copiado, pégalo en el chat'; }
+  catch (e) { const t = $('#exp'); t.style.display = 'block'; t.value = j; t.select(); }
+};
+
+// Recuerdos que vienen de tu Google Sheet (se actualizan solos cada vez que ella abre la app)
+function parseCSV(t) {
+  const rows = []; let r = [], c = '', q = false;
+  for (let i = 0; i < t.length; i++) {
+    const ch = t[i];
+    if (q) { if (ch === '"') { if (t[i + 1] === '"') { c += '"'; i++; } else q = false; } else c += ch; }
+    else if (ch === '"') q = true;
+    else if (ch === ',') { r.push(c); c = ''; }
+    else if (ch === '\n') { r.push(c); rows.push(r); r = []; c = ''; }
+    else if (ch !== '\r') c += ch;
+  }
+  if (c || r.length) { r.push(c); rows.push(r); }
+  return rows;
+}
+function normFecha(s) {
+  s = s.trim();
+  let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  if (m) return `${m[1]}-${pad(+m[2])}-${pad(+m[3])}`;
+  m = s.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
+  if (m) return `${m[3]}-${pad(+m[2])}-${pad(+m[1])}`;
+  return null;
+}
+async function cargarHoja() {
+  if (!URL_HOJA) return;
+  try {
+    const r = await fetch(URL_HOJA, { cache: 'no-store' });
+    const filas = parseCSV(await r.text()), nuevo = {};
+    filas.forEach(f => {
+      const k = normFecha(f[0] || '');
+      if (k) nuevo[k] = { e: (f[1] || '').trim() || '💛', t: f[2] || '' };
+    });
+    try { localStorage.setItem('calamor_hoja', JSON.stringify(nuevo)); } catch (e) {}
+    Object.assign(NOTAS_FIJAS, nuevo);
+  } catch (e) {
+    try { Object.assign(NOTAS_FIJAS, JSON.parse(localStorage.getItem('calamor_hoja') || '{}')); } catch (e2) {}
+  }
+  draw();
+}
+cargarHoja();
+</script>
+</body>
+</html>
